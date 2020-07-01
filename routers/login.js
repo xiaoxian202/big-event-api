@@ -21,7 +21,12 @@ router.post('/login',async (req,res) => {
     let ret = await db.operateData(sql,[param.username,param.password])
     // 如果是查询，那么ret是数组，如果是增删改，那么ret是对象
     if(ret && ret.length > 0){
-        //如果登录验证通过
+        // 如果登录验证通过，就生成该用户的token信息
+        // jwt.sign方法的参数说明
+        // 1、参数一表示添加到token中的用户信息
+        // 2、加密唯一标识（加密的干扰字符串）
+        // 3、加密配置选项（可以设置token的有效期）
+        // jwt要求在token字符串之前添加一个Bearer 特殊标识
         let token = jwt.sign(
             {username:req.body.username,id:ret[0].id},
             'bigevent',
