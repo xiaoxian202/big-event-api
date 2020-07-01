@@ -3,7 +3,7 @@
  */
 const express = require('express')
 const path = require('path')
-//导入第三方包 加密 先下载依赖包
+//导入第三方包 加密 先下载依赖包 
 const utils = require('utility')
 //token生成的规范 安装依赖包
 const jwt = require('jsonwebtoken')
@@ -28,10 +28,9 @@ router.post('/login',async (req,res) => {
         // 3、加密配置选项（可以设置token的有效期）
         // jwt要求在token字符串之前添加一个Bearer 特殊标识
         let token = jwt.sign(
-            {username:req.body.username,id:ret[0].id},
+            {username:param.username,id:ret[0].id},
             'bigevent',
-            {expiresIn:'1h'}
-        )
+            {expiresIn:'1h'})
         res.json({
             status:0,
             message:'登录成功',
