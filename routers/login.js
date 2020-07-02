@@ -30,7 +30,7 @@ router.post('/login',async (req,res) => {
         let token = jwt.sign(
             {username:param.username,id:ret[0].id},
             'bigevent',
-            {expiresIn:'1h'})
+            {expiresIn:'1day'})
         res.json({
             status:0,
             message:'登录成功',
