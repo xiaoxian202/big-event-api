@@ -32,13 +32,22 @@ app.use('/my',userRouter)
 app.use('/my/article',cateRouter)
 app.use('/my/article',articleRouter)
 
+//统一处理不存在的路由
+// app.all表示处理所有形式的请求（get/post/put/delete...）  
+app.all('*',(req,res) => {
+    res.status(404).json({
+        status:404,
+        message:'请求的资源不存在'
+    })
+})
+
 //统一处理异常信息 中间件要放到最后
 app.use((err,req,res,next) => {
     if (err.status === 401) {
         //token验证失败
-        //status参数401表示http协议的响应状态码
+        //status参数401表示http协议的响应状态码，给http协议用的
         res.status(401).json({
-            statsu:401,
+            statsu:401,//给应用程序用的
             message:err.message
         })
     } else {

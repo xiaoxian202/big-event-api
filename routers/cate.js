@@ -9,7 +9,8 @@ const db = require(path.join(__dirname,'../common/db.js'))
 // 获取文章分类列表
 router.get('/cates',async (req,res) => {
     // 直接操作数据库查询所有文章分类列表数据
-    let sql = 'select * from category'
+    // let sql = 'select * from category'
+    let sql = 'select * from category where is_delete = 0'
     let ret = await db.operateData(sql)
     if (ret && ret.length > 0) {
         res.json({
@@ -52,8 +53,8 @@ router.get('/deletecate/:id',async (req,res) => {
     let id = req.params.id
     //操作数据库
     // let sql = 'delete from category where id = ?'
-    // is_delete=1是删除 0是回滚
-    let sql = 'update category set is_delete=0 where id = ?'
+    // is_delete=1是删除 0是存在 数据并没有删除 查询时就要带上条件is_delete=0
+    let sql = 'update category set is_delete=1 where id = ?'
     let ret = await db.operateData(sql,id)
     //响应请求
     if (ret && ret.affectedRows > 0) {
