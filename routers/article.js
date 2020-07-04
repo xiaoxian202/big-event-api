@@ -29,23 +29,35 @@ router.get('/list',async (req,res) => {
         }
     }
     //去掉最后一个and
-    condition = condition.substring(0,condition.lastIndexOf('and'))
+    // condition = condition.substring(0,condition.lastIndexOf('and'))
 
     //操作数据库
     // limit 后的第一个数表示从第几条开始查询
     // limit 后的第二个数表示查询多少条数据
-    let sql = 'select * from article limit ?,?'
+    // let sql = 'select * from article limit ?,?'
+    //联表查询
+    let sql = 'select a.id,a.title,a.pub_date,a.state,c.name as cate_name from article as a join category as c on a.cate_id = c.id where a.is_delete = 0 limit ?,?'
+    //查询列表总数
+    let totalSql = 'select count(*) as total from article'
     //判断
     if(condition) {
-        sql = 'select * from article where '+ condition +' limit ?,?'
+        // condition  += 'and a.is_delete = 0'
+        //不把上面的and去掉就不用添加and
+        condition  += 'a.is_delete = 0'
+        // sql = 'select * from article where '+ condition +' limit ?,?'
+        sql = 'select a.id,a.title,a.pub_date,a.state,c.name as cate_name from article as a join category as c on a.cate_id = c.id where '+ condition +' limit ?,?'
+        //携带条件时查询总数
+        totalSql = 'select count(*) as total from article as a where ' + condition
     }
     // console.log(sql);
     let ret = await db.operateData(sql,[param.pagesize * (param.pagenum - 1),param.pagesize])
+    let cret = await db.operateData(totalSql)
     if (ret && ret.length > 0) {
         res.json({
             status:0,
             message:'获取文章列表成功！',
-            data:ret
+            data:ret,
+            total:cret[0].total
         })
     } else {
         res.json({
@@ -56,13 +68,45 @@ router.get('/list',async (req,res) => {
 })
 
 // 根据 Id 删除文章数据
-router.get('/delete/:id',(req,res) => {
-    res.send('/cates')
+router.get('/delete/:id',async (req,res) => {
+    //获取前端传递过来的参数
+    let param = req.params
+    //操作数据库
+    let sql = 'update article set is_delete = 1 where id = ?'
+    let ret = await db.operateData(sql,param.id)
+    if (ret && ret.affectedRows > 0) {
+        res.json({
+            status:0,
+            message:'删除成功！'
+        })
+    } else {
+        res.json({
+            status:1,
+            message:'删除失败！'
+        })
+    }
+
 })
 
 // 根据 Id 获取文章详情
-router.get('/:id',(req,res) => {
-    res.send('/cates')
+router.get('/:id',async (req,res) => {
+    //获取前端传递过来的id
+    let id = req.params.id
+    // 操作数据库
+    let sql = 'select * from article where is_delete = 0 and id = ?'
+    let ret = await db.operateData(sql,id)
+    if (ret && ret.length > 0) {
+        res.json({
+            status:0,
+            message:'获取文章成功！',
+            data:ret[0]
+        })
+    } else {
+        res.json({
+            status:1,
+            message:'获取文章失败！'
+        })
+    }
 })
 
 // 根据 Id 更新文章信息
