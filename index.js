@@ -10,6 +10,9 @@ const cateRouter = require(path.join(__dirname,'routers/cate.js'))
 const articleRouter = require(path.join(__dirname,'routers/article.js'))
 const app = express()
 
+//启动静态资源服务：把上传的图片变成静态资源
+app.use('/uploads',express.static('uploads'))
+
 //处理客户端请求post参数
 // for parsing application/json
 app.use(express.json()) 

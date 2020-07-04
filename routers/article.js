@@ -5,11 +5,9 @@ const express = require('express')
 const router = express.Router()
 const path = require('path')
 const db = require(path.join(__dirname,'../common/db.js'))
-
-// 发布新文章
-router.post('/add',(req,res) => {
-    res.send('/cates')
-})
+//导入multer包 上传文件
+const multer = require('multer')
+const upload = multer({dest: path.join(__dirname, '../uploads')})
 
 // 获取文章的列表数据
 router.get('/list',async (req,res) => {
@@ -110,9 +108,66 @@ router.get('/:id',async (req,res) => {
 })
 
 // 根据 Id 更新文章信息
-router.post('/edit',(req,res) => {
-    res.send('/cates')
+router.post('/edit',upload.single('cover_img'),async (req,res) => {
+    //获取前端传递过来的参数
+    let param = req.body
+    //上传文件封面的路径
+    let filePath = '/uploads' + req.file.fieldname
+    //操作数据库
+    let sql = 'update article set ? where id = ?'
+    let ret = await db.operateData(sql,[{
+        title:param.title,
+        cate_id:param.cate_id,
+        content:param.content,
+        cover_img:filePath,
+        state:param.state},param.Id])
+    console.log(sql);
+    if (ret && ret.affectedRows > 0) {
+        res.json({
+            status:0,
+            message:'修改文章成功！'
+        })
+    } else {
+        res.json({
+            status:1,
+            message:'修改文章失败！'
+        })
+    }
 })
+
+// 发布新文章
+router.post('/add',upload.single('cover_img'),async (req,res) => {
+    //获取前端传递过来的参数
+    let param = req.body
+    //获取用户ID
+    let id = req.user.id
+    //获取文件上传的路径
+    let filePath = '/uploads/' + req.file.filename
+    //操作数据库
+    let sql = 'insert into article set ?'
+    let ret = await db.operateData(sql,{
+        title:param.title,
+        cate_id:param.cate_id,
+        content:param.content,
+        cover_img:filePath,
+        state:param.state,
+        is_delete:0,
+        author_id:id,
+        pub_date:new Date()
+    })
+    if (ret && ret.affectedRows > 0) {
+        res.json({
+            status:0,
+            message:'发布文章成功！'
+        })
+    } else {
+        res.json({
+            status:0,
+            message:'发布文章失败！'
+        })
+    }
+})
+
 
 
 
